@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_update"
+        android:icon="@drawable/baseline_edit_24"
+        android:title="update"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_remainder"
+        android:icon="@drawable/baseline_notifications_active_24"
+        android:title="Add Remainder"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/baseline_notifications_active_24"
+        android:title="Share"
+        app:showAsAction="always" />
+
+
+</menu>

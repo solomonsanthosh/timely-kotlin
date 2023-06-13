@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:id="@+id/addTeamTaskLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:orientation="vertical"
+        android:padding="15dp"
+        tools:context=".ui.team.addTeamTaskActivity">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/editTitle1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#232323">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_corners"
+                android:hint="Title..."
+                android:textColor="@color/white"
+                android:textColorHint="#D6D6D6" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <EditText
+            android:id="@+id/editContent"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/rounded_corners"
+            android:ems="20"
+            android:gravity="start|top"
+            android:hint="Content..."
+            android:inputType="textMultiLine"
+            android:padding="10dp"
+            android:textColor="@color/white"
+            android:textColorHint="#D6D6D6" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_weight="1">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/memberEdit"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rounded_corners"
+                    android:hint="Enter email of member..."
+                    android:textColor="@color/white"
+                    android:textColorHint="#D6D6D6" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/addMemberBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_weight="0"
+                android:backgroundTint="@color/group"
+                android:text="Add"
+                app:iconPadding="0dp" />
+
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" >
+
+        </ListView>
+
+        <TextView
+            android:id="@+id/addGroupToList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/poppins_semibold"
+            android:text="Add a Group"
+            android:textColor="@color/group"
+            android:textSize="16sp" />
+
+
+        <Button
+            android:id="@+id/datePicker2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+
+
+            android:backgroundTint="@color/group"
+            android:text="Pick Date"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/add"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+
+            android:backgroundTint="@color/group"
+            android:text="Add Activity"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+</layout>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:orientation="vertical"
+        android:padding="15dp"
+        tools:context=".ui.home.addActivity">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/edit1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#232323"
+            app:boxStrokeColor="@color/group"
+            app:boxStrokeErrorColor="@color/group"
+            app:counterOverflowTextColor="@color/group"
+            app:endIconTint="@color/black"
+            app:hintTextColor="@color/group"
+            app:startIconTint="@color/group">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editText1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_corners"
+                android:fontFamily="@font/poppins"
+                android:hint="Title..."
+                android:textColor="#2E2E2E"
+                android:textColorHint="#353535" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <EditText
+            android:id="@+id/editText2"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/rounded_corners"
+            android:ems="20"
+            android:fontFamily="@font/poppins"
+            android:gravity="start|top"
+            android:hint="Content..."
+            android:inputType="textMultiLine"
+            android:padding="10dp"
+            android:textColor="#2E2E2E"
+            android:textColorHint="#515151" />
+
+        <Button
+            android:id="@+id/datePicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_weight="0"
+            android:backgroundTint="@color/group"
+            android:fontFamily="@font/poppins_semibold"
+            android:text="Pick Date"
+            android:textColor="@color/white" />
+
+
+        <Button
+            android:id="@+id/add"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/group"
+            android:fontFamily="@font/poppins_semibold"
+            android:text="Add Activity"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+</layout>
