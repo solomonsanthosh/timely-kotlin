@@ -24,9 +24,14 @@ import com.example.timelynew.databinding.FragmentActivityBinding
 import com.example.timelynew.viewModels.ActivityViewModel
 import com.example.timelynew.viewModels.ActivityViewModelFactory
 import com.google.android.material.snackbar.Snackbar
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -108,6 +113,8 @@ class activityFragment : Fragment() {
 
 
 
+
+
         val simpleCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT){
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -171,50 +178,81 @@ class activityFragment : Fragment() {
                     val title = data.getStringExtra("title")
                     val content = data.getStringExtra("content")
                     val dateString = data.getStringExtra("date")
+                    val path = data.getStringExtra("file")
                     val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
-                    val date:Date = sdf.parse(dateString)
+                    var date:Date? = null
+                    if(dateString != null) {
+                         date = sdf.parse(dateString)
+                    }
+
+
+
+
 
                     var idArray =  ArrayList<Long>();
                     idArray.add(sharedPreferences.getLong("id",0))
 
                     Snackbar.make( binding.activityLayout,idArray.get(0).toString(), Snackbar.LENGTH_LONG).setAction("close",{
                     }).show()
-                    val activity = Activity(0,title!!,content!!, date ,idArray,"self","self")
+                    val activity = Activity(0,title!!,content!!, date ,idArray,"self","self",false,null)
 
 
-                    val body: MutableMap<String, Any> = HashMap()
-                    body["title"] = title!!
-                    body["content"] = content!!
-                    body["userid"] = idArray
-                    body["date"] = date.time!!
+                    val body = mutableMapOf<String, RequestBody>()
+                    body["title"] = RequestBody.create(MultipartBody.FORM, title)
+                    body["content"] =RequestBody.create(MultipartBody.FORM,  content)
+                    body["userid"] =  RequestBody.create(MultipartBody.FORM, idArray.toString())
 
-                    val call = retrofitService.postActivity(body)
-                    call.enqueue(object :Callback<Activity>{
-                        override fun onResponse(
-                            call: Call<Activity>,
-                            response: Response<Activity>
-                        ) {
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                    if(dateString != null){
+                        val dateStringFormat = dateFormat.format(date)
+                        val dateRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), dateStringFormat)
+                        body["date"] =  dateRequestBody
+                    }
 
-                            if(response.isSuccessful){
-                                viewModel.updateActivity(activity)
-                                adaptor = ActivityAdaptor(requireContext(),retrofitServiceUser,retrofitService,binding.activityLayout)
-                                recyclerView.adapter = adaptor
-                                adaptor.setActivity(activities as ArrayList<Activity>)
-                                Snackbar.make( binding.activityLayout,"Activity successfully added.", Snackbar.LENGTH_LONG).setAction("close",{
+
+
+
+                    val filePart = path?.let { filePart(it, "file") }
+
+                    val call = retrofitService.postActivity(body, filePart)
+                    if (call != null) {
+                        call.enqueue(object :Callback<Activity>{
+                            override fun onResponse(
+                                call: Call<Activity>,
+                                response: Response<Activity>
+                            ) {
+
+                                if(response.isSuccessful){
+                                    viewModel.updateActivity(response.body()!!)
+                                    adaptor = ActivityAdaptor(requireContext(),retrofitServiceUser,retrofitService,binding.activityLayout)
+                                    recyclerView.adapter = adaptor
+                                    adaptor.setActivity(activities as ArrayList<Activity>)
+                                    Snackbar.make( binding.activityLayout,"Activity successfully added.", Snackbar.LENGTH_LONG).setAction("close",{
+                                    }).show()
+                                }
+
+                            }
+
+                            override fun onFailure(call: Call<Activity>, t: Throwable) {
+                                Snackbar.make( binding.activityLayout,"Activity creation failed. Please try again...", Snackbar.LENGTH_LONG).setAction("close",{
                                 }).show()
                             }
 
-                        }
-
-                        override fun onFailure(call: Call<Activity>, t: Throwable) {
-                            Snackbar.make( binding.activityLayout,"Activity creation failed. Please try again...", Snackbar.LENGTH_LONG).setAction("close",{
-                            }).show()
-                        }
-
-                    })
+                        })
+                    }
 
                 }
             })
+    }
+
+    private fun filePart(path: String, partName: String): MultipartBody.Part {
+
+            val file = File(path)
+            val requestFile: RequestBody =
+                RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
+            return MultipartBody.Part.createFormData(partName, file.name, requestFile)
+
+
     }
 
 

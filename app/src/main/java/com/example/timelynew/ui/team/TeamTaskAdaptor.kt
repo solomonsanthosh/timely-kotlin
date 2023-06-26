@@ -2,6 +2,10 @@ package com.example.timelynew.ui.team
 
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +24,25 @@ class TeamTaskAdaptor(val context:Activity,val teamTask:ArrayList<TeamTask>):Arr
         val date:TextView = view.findViewById(R.id.teamDate)
         val member:TextView = view.findViewById(R.id.member)
         val status:TextView = view.findViewById(R.id.memberStatus)
+        val attachment:TextView = view.findViewById(R.id.attachmentTeam)
+
+        if(teamTask.get(position).file == null) {
+
+            attachment.visibility = View.GONE
+        } else {
+
+            attachment.setOnClickListener{
+
+                val uris = Uri.parse(teamTask.get(position).file)
+                val intents = Intent(Intent.ACTION_VIEW, uris)
+                val b = Bundle()
+                b.putBoolean("new_window", true)
+                intents.putExtras(b)
+                context.startActivity(intents)
+
+            }
+        }
+
 
 
         title.text = teamTask.get(position).title
@@ -30,5 +53,6 @@ class TeamTaskAdaptor(val context:Activity,val teamTask:ArrayList<TeamTask>):Arr
 
         return view
     }
+
 
 }

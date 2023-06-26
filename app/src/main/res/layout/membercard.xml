@@ -42,6 +42,16 @@
         android:text="TextView"
         android:textColor="#03C988"
         android:textSize="14sp" />
+    <TextView
+        android:id="@+id/attachmentTeam"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/poppins_semibold"
+
+        android:text="View Attachment"
+        android:textColor="#2196F3"
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/members"

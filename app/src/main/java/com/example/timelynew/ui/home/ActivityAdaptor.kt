@@ -7,11 +7,16 @@ import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.opengl.Visibility
+import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ButtonBarLayout
 import androidx.cardview.widget.CardView
@@ -26,11 +31,17 @@ import com.example.timelynew.dataClass.User
 import com.example.timelynew.viewModels.ActivityViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.*
 
 
@@ -39,14 +50,16 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
     var activities:ArrayList<Activity> = ArrayList()
     lateinit var intent: Intent
     var selectedPosition = -1
+    val sp = context.getSharedPreferences("user",AppCompatActivity.MODE_PRIVATE)
     class ActivityHolder(itemView: View) :RecyclerView.ViewHolder(itemView){
         var title: TextView = itemView.findViewById(R.id.title)
         var content : TextView = itemView.findViewById(R.id.content)
         var date: TextView = itemView.findViewById(R.id.date)
         var assignby: TextView = itemView.findViewById(R.id.assignby)
-
+        var pin:ImageView = itemView.findViewById(R.id.pinicon)
         var card: CardView = itemView.findViewById(R.id.card)
         var layout:LinearLayout = itemView.findViewById(R.id.cardLayout)
+        var attachment:TextView = itemView.findViewById(R.id.attachment)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActivityHolder {
@@ -67,6 +80,19 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
         holder.date.text = activities.get(position).date.toString()
         holder.assignby.text = activities.get(position).assignedBy.split('@')[0].toString()
 
+        if(activities.get(holder.adapterPosition).file == null){
+            holder.attachment.visibility = View.GONE
+        }
+        if(activities.get(holder.adapterPosition).date == null){
+            holder.date.visibility = View.GONE
+        }
+
+
+        if(activities.get(holder.adapterPosition).pin == false) {
+            holder.pin.visibility = View.GONE
+        } else {
+            holder.pin.visibility = View.VISIBLE
+        }
         if( holder.assignby.text == "self") {
             holder.assignby.visibility = View.GONE
 
@@ -78,6 +104,7 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
             holder.assignby.setTextColor(context.getResources().getColor(R.color.white))
         }
         else {
+            holder.pin.setImageResource(R.drawable.baseline_push_pin_15_black)
             holder.layout.setBackgroundColor(context.getResources().getColor(R.color.group2))
             holder.title.setTextColor(context.getResources().getColor(R.color.black))
             holder.content.setTextColor(context.getResources().getColor(R.color.black))
@@ -98,6 +125,16 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
 
 
 
+        holder.attachment.setOnClickListener{
+
+            val uris = Uri.parse(activities.get(holder.adapterPosition).file)
+            val intents = Intent(Intent.ACTION_VIEW, uris)
+            val b = Bundle()
+            b.putBoolean("new_window", true)
+            intents.putExtras(b)
+            context.startActivity(intents)
+
+        }
 
 
         holder.card.setOnLongClickListener{
@@ -111,14 +148,47 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
 
             popupMenu.menuInflater.inflate(R.menu.popup_menu,popupMenu.menu)
             if(activities.get(holder.adapterPosition).type != "self"){
-                popupMenu.menu.findItem(R.id.action_update).setEnabled(false)
+//                popupMenu.menu.findItem(R.id.action_update).setEnabled(false)
                 popupMenu.menu.findItem(R.id.action_share).setEnabled(false)
             }
             popupMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item ->
 
                 when(item.itemId) {
-                    R.id.action_update -> {
-                        intent = Intent(context, updateActivity::class.java)
+//                    R.id.action_update -> {
+//                        intent = Intent(context, updateActivity::class.java)
+//                        intent.putExtra("title", holder.title.text)
+//                        intent.putExtra("id", activities.get(holder.adapterPosition).id)
+//                        intent.putExtra("content", holder.content.text)
+//
+//                        intent.putExtra("year", holder.date.text.substring(0,4).toInt())
+//                        intent.putExtra("month", holder.date.text.substring(5,7).toInt()-1)
+//                        intent.putExtra("day", holder.date.text.substring(8,10).toInt())
+//                        context.startActivity(intent)
+//                    }
+//
+//                    R.id.action_remainder ->handleRemainder(holder.title.text.toString())
+                    R.id.action_more -> {
+                        val dialog = BottomSheetDialog(context)
+                        val inflater =
+                            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+
+
+                        val view = inflater.inflate(R.layout.options_activity, null)
+
+                        dialog.setContentView(view)
+                        dialog.show()
+                        val update = view.findViewById<TextView>(R.id.options_update)
+                        var pin = view.findViewById<TextView>(R.id.options_pin)
+                        if(activities.get(holder.adapterPosition).pin == true) {
+                            pin.setText("Unpin activity")
+                        }
+                        val remainder = view.findViewById<TextView>(R.id.options_remainder)
+
+
+                        update.setOnClickListener{
+                            dialog.dismiss()
+                            intent = Intent(context, updateActivity::class.java)
                         intent.putExtra("title", holder.title.text)
                         intent.putExtra("id", activities.get(holder.adapterPosition).id)
                         intent.putExtra("content", holder.content.text)
@@ -127,17 +197,82 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
                         intent.putExtra("month", holder.date.text.substring(5,7).toInt()-1)
                         intent.putExtra("day", holder.date.text.substring(8,10).toInt())
                         context.startActivity(intent)
+                        }
+                        pin.setOnClickListener{
+                            dialog.dismiss()
+                            if(activities.get(holder.adapterPosition).pin == true) {
+
+                                val unpinCall = retrofitActivity.unpinActivity(activities.get(holder.adapterPosition).id)
+                                unpinCall.enqueue(object :Callback<Activity>{
+                                    override fun onResponse(
+                                        call: Call<Activity>,
+                                        response: Response<Activity>
+                                    ) {
+
+                                        if(response.isSuccessful){
+                                            holder.pin.visibility = View.GONE
+                                            activities.removeAt(holder.adapterPosition)
+                                            activities.add(response.body()!!)
+                                            notifyItemRemoved(holder.adapterPosition)
+                                            notifyItemInserted(activities.size-1)
+                                            Snackbar.make(layout,"Activity successfully unpinned.", Snackbar.LENGTH_LONG).setAction("close",{
+                                            }).show()
+                                        } else {
+                                            Snackbar.make(layout,"try again.", Snackbar.LENGTH_LONG).setAction("close",{
+                                            }).show()
+                                        }
+                                    }
+
+                                    override fun onFailure(call: Call<Activity>, t: Throwable) {
+                                        Snackbar.make(layout,t.message.toString(), Snackbar.LENGTH_LONG).setAction("close",{
+                                        }).show()
+                                    }
+                                })
+
+                            } else {
+
+
+                            val pinCall = retrofitActivity.pinActivity(sp.getLong("id",0),activities.get(holder.adapterPosition).id)
+                            pinCall.enqueue(object :Callback<Activity>{
+                                override fun onResponse(
+                                    call: Call<Activity>,
+                                    response: Response<Activity>
+                                ) {
+
+                                    if(response.isSuccessful){
+
+                                        activities.removeAt(holder.adapterPosition)
+                                        activities.add(0,response.body()!!)
+                                        notifyItemRemoved(holder.adapterPosition)
+                                        notifyItemInserted(0)
+
+                                    } else {
+                                        Snackbar.make(layout,"Only 3 activities can be pinned. Unpin to pin more.", Snackbar.LENGTH_LONG).setAction("close",{
+                                        }).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Activity>, t: Throwable) {
+                                    Snackbar.make(layout,t.message.toString(), Snackbar.LENGTH_LONG).setAction("close",{
+                                    }).show()
+                                }
+                            })
+                            }
+
+                        }
+                        remainder.setOnClickListener{
+                            dialog.dismiss()
+                            handleRemainder(holder.title.text.toString())
+                        }
+
                     }
-
-                    R.id.action_remainder ->handleRemainder(holder.title.text.toString())
-
                     R.id.action_share ->
                     {
                         val dialog = BottomSheetDialog(context)
                         val inflater =
                             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-                       val sp = context.getSharedPreferences("user",AppCompatActivity.MODE_PRIVATE)
+
 
                         val view = inflater.inflate(R.layout.bottom_sheet_share, null)
 
@@ -151,24 +286,45 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
 
                                 val call = retrofitUser.getUser(email.text.toString())
                                 call.enqueue(object : Callback<User> {
+                                @RequiresApi(Build.VERSION_CODES.O)
                                 override fun onResponse(
                                     call: Call<User>,
                                     response: Response<User>
                                 ) {
+
                                     if (response.isSuccessful) {
                                         var new_activity: Activity =
                                             activities.get(holder.adapterPosition)
                                         var idArray = java.util.ArrayList<Long>();
                                         idArray.add(response.body()!!.id)
-                                        val body: MutableMap<String, Any> = HashMap()
-                                        body["title"] = new_activity.title!!
-                                        body["content"] = new_activity.content!!
-                                        body["userid"] = idArray
-                                        body["date"] = new_activity.date!!
-                                        body["assignedBy"] =
-                                            sp.getString("email", "null").toString()
-                                       val postCall = retrofitActivity.postActivity(body)
+//
+
+
+                                        val body = mutableMapOf<String, RequestBody>()
+                                        body["title"] = RequestBody.create(MultipartBody.FORM, new_activity.title)
+                                        body["content"] =
+                                            RequestBody.create(MultipartBody.FORM,  new_activity.content)
+                                        body["userid"] =  RequestBody.create(MultipartBody.FORM, idArray.toString())
+
+                                        body["file"] = RequestBody.create(MultipartBody.FORM, new_activity.file!!)
+                                        val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                                        val outputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                                        var outputDateString: String? = null;
+                                        try {
+                                            val dateTime = LocalDateTime.parse(new_activity.date as CharSequence?, inputFormat)
+                                            outputDateString = outputFormat.format(dateTime)
+                                            // Use the outputDateString as needed
+                                        } catch (e: DateTimeParseException) {
+                                            // Handle parse exception
+                                        }
+
+                                        val dateRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), outputDateString!!)
+                                        body["date"] =  dateRequestBody
+                                        body["assignedBy"] = RequestBody.create(MultipartBody.FORM, sp.getString("email", "null").toString())
+
+                                       val postCall = retrofitActivity.postActivity(body,null)
                                         postCall.enqueue(object:Callback<Activity>{
+
                                             override fun onResponse(
                                                 call: Call<Activity>,
                                                 response: Response<Activity>
@@ -211,34 +367,16 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
             })
             popupMenu.show()
             popupMenu.setOnDismissListener {
+                checkColor(holder)
 
 
-                if( holder.assignby.text == "self") {
-                    holder.layout.setBackgroundColor(context.getResources().getColor(R.color.background))
-                    holder.date.setTextColor(context.getResources().getColor(R.color.date))
-                    holder.content.setTextColor(context.getResources().getColor(R.color.white))
-                    holder.title.setTextColor(context.getResources().getColor(R.color.white))
-
-                }  else if (activities.get(holder.adapterPosition).type == "group") {
-                    holder.layout.setBackgroundColor(context.getResources().getColor(R.color.group))
-                    holder.title.setTextColor(context.getResources().getColor(R.color.white))
-                    holder.content.setTextColor(context.getResources().getColor(R.color.white))
-                    holder.date.setTextColor(context.getResources().getColor(R.color.white))
-                    holder.assignby.setTextColor(context.getResources().getColor(R.color.white))
-                }
-                else {
-                    holder.layout.setBackgroundColor(context.getResources().getColor(R.color.group2))
-                    holder.title.setTextColor(context.getResources().getColor(R.color.black))
-                    holder.content.setTextColor(context.getResources().getColor(R.color.black))
-                    holder.date.setTextColor(context.getResources().getColor(R.color.black))
-                    holder.assignby.setTextColor(context.getResources().getColor(R.color.black))
-                }
 
             }
 
             return@setOnLongClickListener true
 
         }
+
     }
     fun setActivity(list:ArrayList<Activity>){
         this.activities = list
@@ -246,6 +384,30 @@ class ActivityAdaptor(var context: Context,var retrofitUser:UserService,var retr
 
 
     }
+    fun checkColor(holder: ActivityHolder){
+
+        if( holder.assignby.text == "self") {
+            holder.layout.setBackgroundColor(context.getResources().getColor(R.color.background))
+            holder.date.setTextColor(context.getResources().getColor(R.color.date))
+            holder.content.setTextColor(context.getResources().getColor(R.color.white))
+            holder.title.setTextColor(context.getResources().getColor(R.color.white))
+
+        }  else if (activities.get(holder.adapterPosition).type == "group") {
+            holder.layout.setBackgroundColor(context.getResources().getColor(R.color.group))
+            holder.title.setTextColor(context.getResources().getColor(R.color.white))
+            holder.content.setTextColor(context.getResources().getColor(R.color.white))
+            holder.date.setTextColor(context.getResources().getColor(R.color.white))
+            holder.assignby.setTextColor(context.getResources().getColor(R.color.white))
+        }
+        else {
+            holder.layout.setBackgroundColor(context.getResources().getColor(R.color.group2))
+            holder.title.setTextColor(context.getResources().getColor(R.color.black))
+            holder.content.setTextColor(context.getResources().getColor(R.color.black))
+            holder.date.setTextColor(context.getResources().getColor(R.color.black))
+            holder.assignby.setTextColor(context.getResources().getColor(R.color.black))
+        }
+    }
+
     fun handleRemainder(text:String){
 
         val date = selectDate(text)

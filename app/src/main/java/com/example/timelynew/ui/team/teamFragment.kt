@@ -2,6 +2,7 @@ package com.example.timelynew.ui.team
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
@@ -24,16 +25,14 @@ import com.example.timelynew.dataClass.User
 import com.example.timelynew.databinding.FragmentTeamBinding
 import com.example.timelynew.retrofit.RetrofitInstance
 import com.google.android.material.snackbar.Snackbar
-import okhttp3.MediaType
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
 import org.json.JSONException
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -91,6 +90,7 @@ class teamFragment : Fragment() {
 
         })
 
+
         binding.list.setOnItemClickListener { adapterView, view, position, l ->
 
             var intent = Intent(requireActivity(),ShowMoreActivity::class.java)
@@ -141,33 +141,42 @@ class teamFragment : Fragment() {
                     val title = data.getStringExtra("title")
                     val content = data.getStringExtra("content")
                     val dateString = data.getStringExtra("date")
+                    val path = data.getStringExtra("file")
                     val members = data.getIntegerArrayListExtra("members")
                     val memberNames = data.getStringArrayListExtra("membersName")
                     val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
-                    val date: Date = sdf.parse(dateString)
+
+                     val   date = sdf.parse(dateString)
+
                     val statusList = ArrayList<String>()
                     for(name in memberNames!!){
                         statusList.add("Not Completed")
                     }
-                    val body: MutableMap<String, Any> = HashMap()
-                    body["title"] = title!!
-                    body["content"] = content!!
-                    body["userid"] = members!!
-                    body["assignedBy"] = sharedPreferences.getString("email","self")!!
-                    body["date"] = date.time!!
-                    body["type"] = "group"
+                    val body = mutableMapOf<String, RequestBody>()
+                    body["title"] = RequestBody.create(MultipartBody.FORM, title!!)
+                    body["content"]  = RequestBody.create(MultipartBody.FORM, content!!)
+                    body["userid"] =  RequestBody.create(MultipartBody.FORM, members.toString())
+                    body["assignedBy"] = RequestBody.create(MultipartBody.FORM,sharedPreferences.getString("email","self")!!)
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
+                        val dateStringFormat = dateFormat.format(date)
+                        val dateRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), dateStringFormat)
+                        body["date"] =  dateRequestBody
 
-                   val call= retrofitService.assignActivity(body)
+                    body["type"] = RequestBody.create(MultipartBody.FORM, "group")
+
+                    val filePart = path?.let { filePart(it, "file") }
+                   val call= retrofitService.assignActivity(body,filePart)
                     call.enqueue(object :Callback<TeamTask>{
                         override fun onResponse(call: Call<TeamTask>, response: Response<TeamTask>) {
-                            taskList.add(TeamTask(title,content,date,memberNames!!,statusList))
+                            taskList.add(TeamTask(title,content,date,memberNames!!,statusList,response.body()!!.file))
                             adaptor.notifyDataSetChanged()
 
                             if(response.isSuccessful){
                                 val body2: MutableMap<String, Any> = HashMap()
                                 body2["title"] = title!!
                                 body2["content"] = content!!
+
                                 body2["date"] = date.time!!
                                 body2["members"] = memberNames!!
                                 body2["status"] = statusList!!
@@ -220,7 +229,15 @@ class teamFragment : Fragment() {
             })
     }
 
+    private fun filePart(path: String, partName: String): MultipartBody.Part {
 
+        val file = File(path)
+        val requestFile: RequestBody =
+            RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
+        return MultipartBody.Part.createFormData(partName, file.name, requestFile)
+
+
+    }
     private fun saveNotification(title:String,body:String,user:User){
          val token:String = taskSharedPreferences.getString("fb","null")!!.toString()
 

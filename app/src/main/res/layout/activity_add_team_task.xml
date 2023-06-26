@@ -95,7 +95,13 @@ xmlns:tools="http://schemas.android.com/tools">
             android:textColor="@color/group"
             android:textSize="16sp" />
 
-
+        <TextView
+            android:id="@+id/filePickerTeam"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Choose a File?"
+            android:textColor="#DDDDDD" />
         <Button
             android:id="@+id/datePicker2"
             android:layout_width="match_parent"

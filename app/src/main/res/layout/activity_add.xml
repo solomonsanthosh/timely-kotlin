@@ -31,7 +31,7 @@
                 android:background="@drawable/rounded_corners"
                 android:fontFamily="@font/poppins"
                 android:hint="Title..."
-                android:textColor="#2E2E2E"
+                android:textColor="#FFFFFF"
                 android:textColorHint="#353535" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -48,8 +48,16 @@
             android:hint="Content..."
             android:inputType="textMultiLine"
             android:padding="10dp"
-            android:textColor="#2E2E2E"
+            android:textColor="#FFFFFF"
             android:textColorHint="#515151" />
+
+        <TextView
+            android:id="@+id/filepicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Choose a File?"
+            android:textColor="#DDDDDD" />
 
         <Button
             android:id="@+id/datePicker"

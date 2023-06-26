@@ -25,7 +25,19 @@
 
             android:background="@color/background"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingLeft="20dp"
+            android:paddingTop="10dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="20dp">
+
+            <ImageView
+                android:id="@+id/pinicon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="3dp"
+                android:rotation="30"
+                android:layout_gravity="right"
+                app:srcCompat="@drawable/baseline_push_pin_15" />
 
             <TextView
                 android:id="@+id/assignby"
@@ -66,7 +78,16 @@
                 android:text="TextView"
                 android:textColor="#03C988"
                 android:textSize="14sp" />
+            <TextView
+                android:id="@+id/attachment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/poppins_semibold"
 
+                android:text="View Attachment"
+                android:textColor="#2196F3"
+                android:textSize="14sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

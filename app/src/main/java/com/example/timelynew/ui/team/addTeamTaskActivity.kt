@@ -1,12 +1,18 @@
 package com.example.timelynew.ui.team
 
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.database.Cursor
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.DocumentsContract
+import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
@@ -27,6 +33,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.create
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -35,13 +43,14 @@ class addTeamTaskActivity : AppCompatActivity() {
 
 
     lateinit var listView: ListView
-    lateinit var selectedDate:String
+     var selectedDate:String? = null
     lateinit var binding:ActivityAddTeamTaskBinding
     private lateinit var retrofitService : UserService
     private lateinit var retrofitGroup:GroupService
     lateinit var sharedPreferences: SharedPreferences
     private lateinit var grpList:ArrayList<String>
     private lateinit var grpMembersData:ArrayList<Group>
+    var path:String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,6 +145,29 @@ class addTeamTaskActivity : AppCompatActivity() {
             dialog.show()
         }
 
+        binding.filePickerTeam.setOnClickListener {
+
+
+
+            val PICK_PDF_FILE = 2
+
+            fun openFile(pickerInitialUri: Uri) {
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "*/*"
+
+                    // Optionally, specify a URI for the file that should appear in the
+                    // system file picker when it loads.
+                    putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+                }
+
+                startActivityForResult(intent, PICK_PDF_FILE)
+            }
+            openFile(Uri.parse("Android/data/"))
+
+        }
+
+
         list.setOnItemClickListener {parent, view, postion, id ->
             grpMembersData.get(postion).members.forEach { member ->
                 arrayList.add(member)
@@ -165,6 +197,7 @@ class addTeamTaskActivity : AppCompatActivity() {
             intent.putExtra("title",binding.editTitle.text.toString())
             intent.putExtra("content",binding.editContent.text.toString())
             intent.putExtra("date",selectedDate)
+            intent.putExtra("file",path)
             intent.putIntegerArrayListExtra("members",arrayList2)
             intent.putStringArrayListExtra("membersName",arrayList)
             setResult(RESULT_OK,intent)
@@ -177,7 +210,57 @@ class addTeamTaskActivity : AppCompatActivity() {
 
 
     }
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        super.onActivityResult(requestCode, resultCode, resultData)
+        if (requestCode == 2
+            && resultCode == Activity.RESULT_OK) {
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+            resultData?.data?.also { uri ->
 
+                val filePath = getFilePathFromUri(this, uri)
+                if (filePath != null) {
+                    path = filePath
+                    binding.filePickerTeam.setText(path!!.substringAfterLast("/"))
+                    // Use the file path as needed
+                } else {
+                    Log.e("AddActivity", "Failed to retrieve file path from URI")
+                }
+                // Perform operations on the document using its URI.
+            }
+        }
+    }
+
+    fun getFilePathFromUri(context: Context, uri: Uri): String? {
+        var filePath: String? = null
+        val contentResolver = context.contentResolver
+
+        val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex: Int = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+                val fileName = it.getString(columnIndex)
+
+                val inputStream = contentResolver.openInputStream(uri)
+                inputStream?.let { input ->
+                    val file = File(context.cacheDir, fileName)
+                    val outputStream = FileOutputStream(file)
+                    outputStream.use { output ->
+                        val buffer = ByteArray(4 * 1024) // 4KB buffer size
+                        var read: Int
+                        while (input.read(buffer).also { read = it } != -1) {
+                            output.write(buffer, 0, read)
+                        }
+                        output.flush()
+                    }
+                    filePath = file.absolutePath
+                }
+            }
+        }
+
+        return filePath
+    }
 
     fun clickDatePicker(view: View){
         val myCalender = Calendar.getInstance()
