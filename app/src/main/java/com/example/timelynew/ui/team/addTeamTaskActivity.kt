@@ -193,17 +193,25 @@ class addTeamTaskActivity : AppCompatActivity() {
 
         }
         binding.add.setOnClickListener {
-            var intent = Intent()
-            intent.putExtra("title",binding.editTitle.text.toString())
-            intent.putExtra("content",binding.editContent.text.toString())
-            intent.putExtra("date",selectedDate)
-            intent.putExtra("file",path)
-            intent.putIntegerArrayListExtra("members",arrayList2)
-            intent.putStringArrayListExtra("membersName",arrayList)
-            setResult(RESULT_OK,intent)
-            finish()
-            Snackbar.make( binding.addTeamTaskLayout,arrayList2.toString(), Snackbar.LENGTH_LONG).setAction("close",{
-            }).show()
+            if(binding.editTitle.text.isNullOrEmpty() || binding.editTitle.text.isNullOrEmpty() || selectedDate.isNullOrEmpty()){
+                Snackbar.make( binding.addTeamTaskLayout,"Title, Content, Date is Required", Snackbar.LENGTH_LONG).setAction("close",{
+                }).show()
+            } else if(arrayList2.size == 0){
+                Snackbar.make( binding.addTeamTaskLayout,"Add atleast one member.", Snackbar.LENGTH_LONG).setAction("close",{
+                }).show()
+            } else {
+                var intent = Intent()
+                intent.putExtra("title",binding.editTitle.text.toString())
+                intent.putExtra("content",binding.editContent.text.toString())
+                intent.putExtra("date",selectedDate)
+                intent.putExtra("file",path)
+                intent.putIntegerArrayListExtra("members",arrayList2)
+                intent.putStringArrayListExtra("membersName",arrayList)
+                setResult(RESULT_OK,intent)
+                finish()
+
+            }
+
         }
 
 

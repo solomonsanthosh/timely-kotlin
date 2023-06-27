@@ -36,44 +36,49 @@ class SignupActivity : AppCompatActivity() {
 
         binding.apply {
             buttonSignup.setOnClickListener {
+                if(!email.text.isNullOrEmpty() && !password.text.isNullOrEmpty()){
+                    auth.createUserWithEmailAndPassword(email.text.toString(), password.text.toString()).addOnCompleteListener { task ->
 
-                auth.createUserWithEmailAndPassword(email.text.toString(), password.text.toString()).addOnCompleteListener { task ->
+                        if(task.isSuccessful) {
+                            val body: MutableMap<String, Any> = HashMap()
+                            body["email"] = email.text.toString().trim()
+                            body["token"] = tokenSharedPreferences.getString("fb","null")!!
+                            val call = retrofitService.createUser(body)
+                            call.enqueue(object:Callback<User>{
+                                override fun onResponse(call: Call<User>, response: Response<User>) {
+                                    val editor = userSharedPreferences.edit()
 
-                    if(task.isSuccessful) {
-                        val body: MutableMap<String, Any> = HashMap()
-                        body["email"] = email.text.toString().trim()
-                        body["token"] = tokenSharedPreferences.getString("fb","null")!!
-                        val call = retrofitService.createUser(body)
-                        call.enqueue(object:Callback<User>{
-                            override fun onResponse(call: Call<User>, response: Response<User>) {
-                                val editor = userSharedPreferences.edit()
+                                    editor.putString("email",response.body()!!.email)
+                                    editor.putLong("id",response.body()!!.id)
+                                    editor.apply()
+                                    Snackbar.make( signuplayout ,"Signup Successful", Snackbar.LENGTH_LONG).setAction("close",{
+                                    }).show()
+                                    var intent = Intent(this@SignupActivity,MainActivity::class.java)
+                                    startActivity(intent)
+                                }
 
-                                editor.putString("email",response.body()!!.email)
-                                editor.putLong("id",response.body()!!.id)
-                                editor.apply()
-                                Snackbar.make( signuplayout ,"Signup Successful", Snackbar.LENGTH_LONG).setAction("close",{
-                                }).show()
-                                var intent = Intent(this@SignupActivity,MainActivity::class.java)
-                                startActivity(intent)
-                            }
+                                override fun onFailure(call: Call<User>, t: Throwable) {
+                                    Snackbar.make( signuplayout , t.message.toString(), Snackbar.LENGTH_LONG).setAction("close",{
+                                    }).show()
+                                }
 
-                            override fun onFailure(call: Call<User>, t: Throwable) {
-                                Snackbar.make( signuplayout , t.message.toString(), Snackbar.LENGTH_LONG).setAction("close",{
-                                }).show()
-                            }
-
-                        })
+                            })
 
 
 //                        var intent = Intent(this@SignupActivity,MainActivity::class.java)
 //                        startActivity(intent)
 
-                    } else {
+                        } else {
 
-                        Snackbar.make( signuplayout , task.exception?.message.toString(), Snackbar.LENGTH_LONG).setAction("close",{
-                        }).show()
+                            Snackbar.make( signuplayout , task.exception?.message.toString(), Snackbar.LENGTH_LONG).setAction("close",{
+                            }).show()
+                        }
                     }
+                } else {
+                    Snackbar.make( signuplayout , "Please fill the inputs", Snackbar.LENGTH_LONG).setAction("close",{
+                    }).show()
                 }
+
             }
 
             login.setOnClickListener {

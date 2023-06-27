@@ -194,7 +194,7 @@ class activityFragment : Fragment() {
 
                     Snackbar.make( binding.activityLayout,idArray.get(0).toString(), Snackbar.LENGTH_LONG).setAction("close",{
                     }).show()
-                    val activity = Activity(0,title!!,content!!, date ,idArray,"self","self",false,null)
+                    val activity = Activity(0,title!!,content!!, date ,idArray,"self","self",false,null,"Not Completed")
 
 
                     val body = mutableMapOf<String, RequestBody>()

@@ -78,7 +78,7 @@ class teamFragment : Fragment() {
                 if(response.isSuccessful){
                     taskList.addAll(ArrayList(response.body()))
                     adaptor.notifyDataSetChanged()
-                    Toast.makeText(requireActivity(),response.body()?.size.toString(),Toast.LENGTH_LONG).show()
+
 
                 }
 

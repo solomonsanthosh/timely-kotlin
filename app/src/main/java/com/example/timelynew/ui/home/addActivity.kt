@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.example.timelynew.R
 import com.example.timelynew.databinding.ActivityAddBinding
+import com.google.android.material.snackbar.Snackbar
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -72,14 +73,21 @@ class addActivity : AppCompatActivity() {
 
        add.setOnClickListener {
 
-            var intent = Intent()
-            intent.putExtra("title",binding.editText1.text.toString())
-            intent.putExtra("content",binding.editText2.text.toString())
-            intent.putExtra("date",selectedDate)
+           if(!binding.editText1.text.isNullOrEmpty() && !binding.editText2.text.isNullOrEmpty()){
+               var intent = Intent()
+               intent.putExtra("title",binding.editText1.text.toString())
+               intent.putExtra("content",binding.editText2.text.toString())
+               intent.putExtra("date",selectedDate)
 
-           intent.putExtra("file", path)
-            setResult(RESULT_OK,intent)
-            finish()
+               intent.putExtra("file", path)
+               setResult(RESULT_OK,intent)
+               finish()
+           } else {
+               Snackbar.make(binding.addActivityLayout,"Title and Content is required.",Snackbar.LENGTH_LONG).setAction("close",{
+               }).show()
+           }
+
+
 
         }
         }

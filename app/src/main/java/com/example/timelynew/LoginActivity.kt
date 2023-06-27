@@ -47,10 +47,9 @@ class LoginActivity : AppCompatActivity() {
                 return@OnCompleteListener
             }
 
-            // Get new FCM registration token
+
             val token = task.result
-            Log.i("TTTT", token.toString())
-            Log.i("Tokenssssssssss",token.toString())
+
         })
         auth = FirebaseAuth.getInstance()
         binding = DataBindingUtil.setContentView(this,R.layout.activity_login)
@@ -62,92 +61,99 @@ class LoginActivity : AppCompatActivity() {
 
              button.setOnClickListener {
 
-                auth.signInWithEmailAndPassword(email.text.toString(), password.text.toString()).addOnCompleteListener { task ->
+                 if(!email.text.isNullOrEmpty() && !password.text.isNullOrEmpty())
+                 {
+                     auth.signInWithEmailAndPassword(email.text.toString(), password.text.toString()).addOnCompleteListener { task ->
 
-                    if(task.isSuccessful) {
+                         if(task.isSuccessful) {
 
 
-                        try {
+                             try {
 
 
-                            val call :Call<User> = retrofitService.getUser(email.text.toString())
-                            call.enqueue(object:Callback<User>{
-                                override fun onResponse(
-                                    call: Call<User>,
-                                    response: Response<User>
-                                ) {
+                                 val call :Call<User> = retrofitService.getUser(email.text.toString())
+                                 call.enqueue(object:Callback<User>{
+                                     override fun onResponse(
+                                         call: Call<User>,
+                                         response: Response<User>
+                                     ) {
 //                                    factory = UserViewModelFactory(response.body()!!)
-                                    if(response.isSuccessful){
-                                        val user: User = response.body()!!
+                                         if(response.isSuccessful){
+                                             val user: User = response.body()!!
 
-                                        sharedPreferences = getSharedPreferences("user",AppCompatActivity.MODE_PRIVATE)
-                                        val editor = sharedPreferences.edit()
+                                             sharedPreferences = getSharedPreferences("user",AppCompatActivity.MODE_PRIVATE)
+                                             val editor = sharedPreferences.edit()
 
-                                        editor.putString("email",user.email)
-                                        editor.putLong("id",user.id)
-                                        editor.apply()
-                                        if(user.token != tokenSharedPreferences.getString("fb",null)){
-                                          val call2 =  retrofitService.updateUser(user.email,tokenSharedPreferences.getString("fb","null")!!)
-                                           call2.enqueue(object:Callback<User>{
-                                                override fun onFailure(
-                                                    call: Call<User>,
-                                                    t: Throwable
-                                                ) {
-                                                    Log.i("PLSSSSSSSSSSSSS",tokenSharedPreferences.getString("fb","null")!!.toString())
-                                                    Toast.makeText(applicationContext, t.message.toString(),
-                                                        Toast.LENGTH_SHORT).show()
-                                                }
+                                             editor.putString("email",user.email)
+                                             editor.putLong("id",user.id)
+                                             editor.apply()
+                                             if(user.token != tokenSharedPreferences.getString("fb",null)){
+                                                 val call2 =  retrofitService.updateUser(user.email,tokenSharedPreferences.getString("fb","null")!!)
+                                                 call2.enqueue(object:Callback<User>{
+                                                     override fun onFailure(
+                                                         call: Call<User>,
+                                                         t: Throwable
+                                                     ) {
+                                                         Log.i("PLSSSSSSSSSSSSS",tokenSharedPreferences.getString("fb","null")!!.toString())
+                                                         Toast.makeText(applicationContext, t.message.toString(),
+                                                             Toast.LENGTH_SHORT).show()
+                                                     }
 
-                                                override fun onResponse(
-                                                    call: Call<User>,
-                                                    response: Response<User>
-                                                ) {
-                                                    TODO("Not yet implemented")
-                                                }
+                                                     override fun onResponse(
+                                                         call: Call<User>,
+                                                         response: Response<User>
+                                                     ) {
+                                                         TODO("Not yet implemented")
+                                                     }
 
-                                            })
-                                        }
-
-
+                                                 })
+                                             }
 
 
 
-                                        Snackbar.make( layout ,"Login Successful",Snackbar.LENGTH_LONG).setAction("close",{
-                                        }).show()
-
-                                        var intent = Intent(this@LoginActivity,MainActivity::class.java)
-                                        startActivity(intent)
-                                    }
-                                    }
 
 
-                                override fun onFailure(call: Call<User>, t: Throwable) {
+                                             Snackbar.make( layout ,"Login Successful",Snackbar.LENGTH_LONG).setAction("close",{
+                                             }).show()
 
-                                    Toast.makeText(applicationContext, t.message.toString(),
-                                        Toast.LENGTH_SHORT).show()
-                                }
-
-
-                            })
-
-                        } catch(e:Error){
-                            Snackbar.make( layout ,"Login Failed",Snackbar.LENGTH_LONG).setAction("close",{
-                            }).show()
-                        }
+                                             var intent = Intent(this@LoginActivity,MainActivity::class.java)
+                                             startActivity(intent)
+                                         }
+                                     }
 
 
+                                     override fun onFailure(call: Call<User>, t: Throwable) {
+
+                                         Toast.makeText(applicationContext, t.message.toString(),
+                                             Toast.LENGTH_SHORT).show()
+                                     }
+
+
+                                 })
+
+                             } catch(e:Error){
+                                 Snackbar.make( layout ,"Login Failed",Snackbar.LENGTH_LONG).setAction("close",{
+                                 }).show()
+                             }
 
 
 
 
 
 
-                    } else {
 
-                        Snackbar.make( layout , task.exception?.message.toString(),Snackbar.LENGTH_LONG).setAction("close",{
-                        }).show()
-                    }
-                }
+
+                         } else {
+
+                             Snackbar.make( layout , task.exception?.message.toString(),Snackbar.LENGTH_LONG).setAction("close",{
+                             }).show()
+                         }
+                     }
+                 } else {
+                     Snackbar.make( layout , "Please fill the inputs",Snackbar.LENGTH_LONG).setAction("close",{
+                     }).show()
+                 }
+
              }
             signup.setOnClickListener {
                 startActivity(Intent(this@LoginActivity,SignupActivity::class.java))

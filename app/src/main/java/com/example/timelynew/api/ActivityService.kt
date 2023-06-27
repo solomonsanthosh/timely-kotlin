@@ -19,6 +19,9 @@ interface ActivityService {
     @GET("api/activity/{id}")
     fun getActivities(@Path("id") id:Long):Call<List<Activity>>
 
+    @GET("api/allactivity/{id}")
+    fun getAllActivities(@Path("id") id:Long):Call<List<Activity>>
+
     @GET("api/team/{email}")
     fun getTeamTask(@Path("email") email:String):Call<List<TeamTask>>
 

@@ -9,5 +9,6 @@ data class Activity(
     val assignedBy:String,
     val type:String,
     val pin:Boolean,
-    val file: String?
+    val file: String?,
+    val status:String
 )
