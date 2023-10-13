@@ -11,7 +11,7 @@
         android:background="@color/black"
         android:orientation="vertical"
         android:padding="15dp"
-        tools:context=".ui.home.addActivity">
+        tools:context=".view.activities.addActivity">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/edit1"

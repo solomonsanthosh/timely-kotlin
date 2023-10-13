@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:padding="15dp"
     android:id="@+id/updateActivityLayout"
-    tools:context=".ui.home.updateActivity">
+    tools:context=".view.activities.updateActivity">
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/edit1update"
         android:layout_width="match_parent"

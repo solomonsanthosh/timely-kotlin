@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#000000"
     android:id="@+id/signuplayout"
-    tools:context=".SignupActivity">
+    tools:context=".view.auth.SignupActivity">
 
     <TextView
         android:id="@+id/signuptext"

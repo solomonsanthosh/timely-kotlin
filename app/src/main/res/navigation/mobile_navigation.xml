@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.timelynew.ui.home.activityFragment"
+        android:name="com.example.timelynew.view.activities.activityFragment"
         android:label="@string/title_activity"
         tools:layout="@layout/fragment_activity" />
 
     <fragment
         android:id="@+id/navigation_account"
-        android:name="com.example.timelynew.ui.account.AccountFragment"
+        android:name="com.example.timelynew.view.account.AccountFragment"
         android:label="@string/title_account"
         tools:layout="@layout/fragment_account" />
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="com.example.timelynew.ui.team.teamFragment"
+        android:name="com.example.timelynew.view.team.teamFragment"
         android:label="@string/title_team"
         tools:layout="@layout/fragment_team" />
 </navigation>

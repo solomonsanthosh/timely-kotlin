@@ -9,7 +9,7 @@
         android:background="#000000"
         android:id="@+id/create_group_layout"
         android:padding="20dp"
-        tools:context=".ui.account.CreateGroup">
+        tools:context=".view.account.CreateGroup">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayout"

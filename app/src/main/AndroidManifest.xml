@@ -6,9 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -21,27 +20,30 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".ui.account.CreateGroup"
-            android:windowSoftInputMode="adjustPan"
+            android:name=".view.AppIntro"
             android:exported="false" />
         <activity
-            android:name=".ui.account.ViewGroups"
+            android:name=".view.account.CreateGroup"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".view.account.ViewGroups"
             android:exported="false" />
         <activity
-            android:name=".ui.home.updateActivity"
+            android:name=".view.activities.updateActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.team.ShowMoreActivity"
+            android:name=".view.team.ShowMoreActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.team.addTeamTaskActivity"
+            android:name=".view.team.addTeamTaskActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.home.addActivity"
+            android:name=".view.activities.addActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".ui.home.showActivity"
+            android:name=".view.activities.showActivity"
             android:exported="false" />
 
         <uses-library
@@ -49,10 +51,10 @@
             android:required="false" />
 
         <activity
-            android:name=".SignupActivity"
+            android:name=".view.auth.SignupActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".view.auth.LoginActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -66,14 +68,14 @@
             android:exported="false" />
 
         <service
-            android:name=".FirebaseService"
+            android:name=".utils.FirebaseService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
-        <receiver android:name=".NotificationReceiver" />
+        <receiver android:name=".utils.NotificationReceiver" />
 
         <meta-data
             android:name="preloaded_fonts"

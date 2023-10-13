@@ -9,7 +9,7 @@
         android:background="#000000"
         android:orientation="vertical"
         android:padding="20dp"
-        tools:context=".ui.team.ShowMoreActivity">
+        tools:context=".view.team.ShowMoreActivity">
 
         <TextView
             android:id="@+id/titleMore"
